@@ -191,7 +191,12 @@ target_sources(leveldb
     "util/no_destructor.h"
     "util/options.cc"
     "util/random.h"
-    "util/status.cc"
+    "util/status.cc" # MARKER: ADDITIONS BELOW
+    "db/compressors/decompressAllocator.cc"
+    "db/compressors/decompressAllocator.h"
+    "db/compressors/zlibCompression.cc"
+    "db/compressors/zlibCompression.h"
+    "db/compressors/compression.h"
 
   # Only CMake 3.3+ supports PUBLIC sources in targets exported by "install".
   $<$<VERSION_GREATER:CMAKE_VERSION,3.2>:PUBLIC>
@@ -270,6 +275,10 @@ if(HAVE_CLANG_THREAD_SAFETY)
       -Werror -Wthread-safety)
 endif(HAVE_CLANG_THREAD_SAFETY)
 
+# MARKER: Insert zlib here
+add_subdirectory("third_party/zlib")
+target_link_libraries(leveldb zlibstatic)
+
 if(HAVE_CRC32C)
   target_link_libraries(leveldb crc32c)
 endif(HAVE_CRC32C)
@@ -321,7 +330,7 @@ if(LEVELDB_BUILD_TESTS)
 
         "${test_file}"
     )
-    target_link_libraries("${test_target_name}" leveldb gmock gtest)
+    target_link_libraries("${test_target_name}" leveldb gmock gtest) #MARKER: ADDITION HERE
     target_compile_definitions("${test_target_name}"
       PRIVATE
         ${LEVELDB_PLATFORM_NAME}=1

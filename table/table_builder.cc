@@ -16,6 +16,8 @@
 #include "util/coding.h"
 #include "util/crc32c.h"
 
+#include "db/compressors/compression.h"
+
 namespace leveldb {
 
 struct TableBuilder::Rep {
@@ -150,6 +152,7 @@ void TableBuilder::WriteBlock(BlockBuilder* block, BlockHandle* handle) {
   Slice block_contents;
   CompressionType type = r->options.compression;
   // TODO(postrelease): Support more compression options: zlib?
+  // A ha ha, my good friend, this modification does just that!
   switch (type) {
     case kNoCompression:
       block_contents = raw;
@@ -160,6 +163,21 @@ void TableBuilder::WriteBlock(BlockBuilder* block, BlockHandle* handle) {
       if (port::Snappy_Compress(raw.data(), raw.size(), compressed) &&
           compressed->size() < raw.size() - (raw.size() / 8u)) {
         block_contents = *compressed;
+      } else {
+        // Snappy not supported, or compressed less than 12.5%, so just
+        // store uncompressed form
+        block_contents = raw;
+        type = kNoCompression;
+      }
+      break;
+    }
+
+    case kZlibCompression: {
+      //MARKER: Todo
+      std::string& compressed = r->compressed_output;
+      compression::zlib::compress(raw.data(), raw.size(), compressed);
+      if(compressed.size() < raw.size() - (raw.size() / 8u)){
+        block_contents = compressed;
       } else {
         // Snappy not supported, or compressed less than 12.5%, so just
         // store uncompressed form

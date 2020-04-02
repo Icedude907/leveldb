@@ -10,6 +10,9 @@
 #include "util/coding.h"
 #include "util/crc32c.h"
 
+#include "db/compressors/compression.h"
+#include "db/compressors/decompressAllocator.h"
+
 namespace leveldb {
 
 void BlockHandle::EncodeTo(std::string* dst) const {
@@ -129,6 +132,24 @@ Status ReadBlock(RandomAccessFile* file, const ReadOptions& options,
       result->heap_allocated = true;
       result->cachable = true;
       break;
+    }
+    //MARKER: Zlib
+    case kZlibCompression: {
+      std::string buffer;
+      //TODO: initialise buffer with length
+			buffer = decompression::allocator::get();
+      if(compression::zlib::decompress(data, n, buffer)){
+        //Successful decompression
+        auto ubuf = new char[buffer.size()];
+				memcpy(ubuf, buffer.data(), buffer.size());
+				result->data = Slice(ubuf, buffer.size());
+				result->heap_allocated = true;
+				result->cachable = true;
+      }else{
+        return Status::Corruption("corrupted compressed block contents");
+      }
+      delete[] buf;
+      decompression::allocator::release(std::move(buffer));
     }
     default:
       delete[] buf;

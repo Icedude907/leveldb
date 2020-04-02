@@ -26,7 +26,11 @@ enum CompressionType {
   // NOTE: do not change the values of existing entries, as these are
   // part of the persistent format on disk.
   kNoCompression = 0x0,
-  kSnappyCompression = 0x1
+  kSnappyCompression = 0x1,
+  //TODO: Implement below
+  kZlibCompression = 0x2, //And zopfli
+  kZstdCompression = 0x3,
+  kZlibCompressionRaw = 0x4
 };
 
 // Options to control the behavior of a database (passed to DB::Open)
@@ -128,6 +132,7 @@ struct LEVELDB_EXPORT Options {
   // worth switching to kNoCompression.  Even if the input data is
   // incompressible, the kSnappyCompression implementation will
   // efficiently detect that and will switch to uncompressed mode.
+  // use kZlibCompression to read minecraft bedrock's levelDb files
   CompressionType compression = kSnappyCompression;
 
   // EXPERIMENTAL: If true, append to existing MANIFEST and log files
