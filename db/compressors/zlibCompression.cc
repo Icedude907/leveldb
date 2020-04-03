@@ -1,10 +1,14 @@
 #include "db/compressors/zlibCompression.h"
 
 namespace leveldb::compression::zlib{
+	const int compressionLevel = 2;
+	const bool raw = false;
+
     int _window(){
 		return raw ? -15 : 15;
 	}
-    void compress(const int8_t* datain, size_t length, std::string& output){
+
+    void compress(const char* datain, size_t length, std::string& output){
         const size_t BUFSIZE = 128 * 1024;
 		unsigned char temp_buffer[BUFSIZE];
 

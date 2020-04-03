@@ -173,7 +173,7 @@ void TableBuilder::WriteBlock(BlockBuilder* block, BlockHandle* handle) {
     }
 
     case kZlibCompression: {
-      //MARKER: Todo
+      //MARKER: Todo - TEST
       std::string& compressed = r->compressed_output;
       compression::zlib::compress(raw.data(), raw.size(), compressed);
       if(compressed.size() < raw.size() - (raw.size() / 8u)){
